@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private BillGroupRepository groupRepository;
 
     @Override
+    @Transactional
     public UserCreatedDto createUser(String name, String email) {
         Optional<UserModel> userByEmail = userRepository.findByEmail(email);
         if (userByEmail.isPresent()) {
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserById(Long userId) {
         UserModel userModel = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
@@ -58,6 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserGroupSummaryDto> getListGroup(Long userId) {
         List<UserGroupSummaryProjection> userGroupSummary = groupRepository.getUserGroupSummaryProjectionById(userId);
         List<UserGroupSummaryDto> summaryDto = userGroupSummary.stream()
@@ -74,8 +78,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getUsersByGroup(Long groupId) {
         List<UserModel> byGroupId = userRepository.findByGroupId(groupId);
+        if (byGroupId.isEmpty()) {
+            throw new EntityNotFoundException("User with id " + groupId + " not found.");
+        }
         List<UserDto> userList = byGroupId.stream()
                 .map(
                         u -> UserDto.builder()

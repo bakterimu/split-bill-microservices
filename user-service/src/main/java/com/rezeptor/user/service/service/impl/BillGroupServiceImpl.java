@@ -15,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class BillGroupServiceImpl implements BillGroupService {
     private UserGroupRepository userGroupRepository;
 
     @Override
+    @Transactional
     public GroupCreatedDto createGroup(GroupCreateReq req) {
         Optional<UserModel> userById = userRepository.findById(req.getCreatedByUserId());
         if (userById.isEmpty()) {
@@ -39,6 +41,7 @@ public class BillGroupServiceImpl implements BillGroupService {
                 .createdBy(userById.get())
                 .build();
 
+        group.addMember(userById.get());
         group = groupRepository.save(group);
         log.info("Group created with id: {}", group.getId());
 
@@ -50,6 +53,7 @@ public class BillGroupServiceImpl implements BillGroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public GroupDto getGroupById(Long id) {
         BillGroupModel group = groupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Group not found"));
@@ -73,6 +77,7 @@ public class BillGroupServiceImpl implements BillGroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void addMember(Long groupId, Long userId) {
         Optional<UserModel> userOpt = userRepository.findById(userId);
         Optional<BillGroupModel> groupOpt = groupRepository.findById(groupId);
