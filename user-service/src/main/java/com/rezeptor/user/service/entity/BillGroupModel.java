@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @Setter
 @Getter
-public class BillGroup {
+public class BillGroupModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,12 +29,12 @@ public class BillGroup {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "group")
     @Builder.Default
-    private List<UserGroup> members = new ArrayList<>();
+    private List<UserGroupModel> members = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     public void addMember(UserModel user) {
-        members.add(new UserGroup(this, user));
+        members.add(new UserGroupModel(this, user));
     }
 }

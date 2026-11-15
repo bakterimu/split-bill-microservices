@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @NoArgsConstructor
-public class UserGroup {
+public class UserGroupModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @JoinColumn(name = "group_id")
     @ManyToOne(fetch = FetchType.LAZY)
-    private BillGroup group;
+    private BillGroupModel group;
 
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +29,7 @@ public class UserGroup {
     @CreationTimestamp
     private LocalDateTime joinedAt;
 
-    public UserGroup(BillGroup group, UserModel user) {
+    public UserGroupModel(BillGroupModel group, UserModel user) {
         this.group = group;
         this.user = user;
     }
