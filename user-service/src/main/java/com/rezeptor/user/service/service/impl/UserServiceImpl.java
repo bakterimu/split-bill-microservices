@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsersByGroup(Long groupId) {
         List<UserModel> byGroupId = userRepository.findByGroupId(groupId);
         if (byGroupId.isEmpty()) {
-            throw new EntityNotFoundException("User with id " + groupId + " not found.");
+            throw new EntityNotFoundException("user with group with id " + groupId + " not found.");
         }
         List<UserDto> userList = byGroupId.stream()
                 .map(

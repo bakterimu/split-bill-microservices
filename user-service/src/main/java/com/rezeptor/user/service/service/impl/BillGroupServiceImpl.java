@@ -77,7 +77,7 @@ public class BillGroupServiceImpl implements BillGroupService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public void addMember(Long groupId, Long userId) {
         Optional<UserModel> userOpt = userRepository.findById(userId);
         Optional<BillGroupModel> groupOpt = groupRepository.findById(groupId);

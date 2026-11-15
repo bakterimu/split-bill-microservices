@@ -59,10 +59,11 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public Response<ProblemDetail> handleGenericException(Exception ex) {
+    public ResponseEntity<?> handleGenericException(Exception ex) {
         log.error("Internal server error", ex);
         return Response.internalServerError(
-                ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"));
+                ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"))
+                .toEntity();
     }
 
     private Stream<ValidationError> fromBindingResult(BindingResult bindingResult) {

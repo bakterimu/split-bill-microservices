@@ -7,7 +7,7 @@ create table users (
 
 create table bill_groups (
     id bigserial primary key,
-    name varchar(255) not null unique,
+    name varchar(255) not null,
     created_by bigint not null references users(id),
     created_at timestamp default now()
 );
