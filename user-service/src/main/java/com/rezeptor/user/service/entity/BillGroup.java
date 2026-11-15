@@ -28,7 +28,6 @@ public class BillGroup {
     private UserModel createdBy;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "group")
-    @JoinColumn(name = "group_id")
     @Builder.Default
     private List<UserGroup> members = new ArrayList<>();
 

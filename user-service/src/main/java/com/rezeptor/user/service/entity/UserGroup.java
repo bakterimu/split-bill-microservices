@@ -9,7 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_groups", uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "user_id"}))
+@Table(name = "user_group", uniqueConstraints = @UniqueConstraint(columnNames = {"group_id", "user_id"}))
 @Setter
 @Getter
 @NoArgsConstructor
