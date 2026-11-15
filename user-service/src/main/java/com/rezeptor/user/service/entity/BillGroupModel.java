@@ -27,7 +27,7 @@ public class BillGroupModel {
     @JoinColumn(name = "created_by", nullable = false)
     private UserModel createdBy;
 
-    @OneToMany(groucascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "group")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "group")
     @Builder.Default
     private List<UserGroupModel> members = new ArrayList<>();
 
