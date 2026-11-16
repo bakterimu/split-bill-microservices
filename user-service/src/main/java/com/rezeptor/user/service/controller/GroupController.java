@@ -1,5 +1,6 @@
 package com.rezeptor.user.service.controller;
 
+import com.rezeptor.user.service.dto.request.AddMemberReq;
 import com.rezeptor.user.service.dto.request.GroupCreateReq;
 import com.rezeptor.user.service.dto.response.*;
 import com.rezeptor.user.service.service.BillGroupService;
@@ -30,9 +31,9 @@ public class GroupController {
         return Response.ok(groupById).toEntity();
     }
 
-    @PostMapping("/{groupId}/user/{userId}")
-    public ResponseEntity<?> addUserToGroup(@PathVariable Long groupId, @PathVariable Long userId) {
-        groupService.addMember(groupId, userId);
+    @PostMapping("/user")
+    public ResponseEntity<?> addUserToGroup(@Valid @RequestBody AddMemberReq addMemberReq) {
+        groupService.addMember(addMemberReq.getGroupId(), addMemberReq.getUserId());
         return Response.ok(null).toEntity();
     }
 
