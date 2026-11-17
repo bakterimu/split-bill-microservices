@@ -3,9 +3,14 @@ package com.rezeptor.settlement.svc.service.impl;
 import com.rezeptor.settlement.svc.client.ExpenseServiceClient;
 import com.rezeptor.settlement.svc.data.BalanceData;
 import com.rezeptor.settlement.svc.data.TransferData;
+import com.rezeptor.settlement.svc.dto.request.SettlementCreateReq;
 import com.rezeptor.settlement.svc.dto.response.BalanceDto;
+import com.rezeptor.settlement.svc.dto.response.SettlementDto;
+import com.rezeptor.settlement.svc.dto.response.SettlementHistoryDto;
 import com.rezeptor.settlement.svc.dto.response.SettlementSuggestionDto;
 import com.rezeptor.settlement.svc.dto.response.TransferDto;
+import com.rezeptor.settlement.svc.entity.SettlementModel;
+import com.rezeptor.settlement.svc.exception.BusinessException;
 import com.rezeptor.settlement.svc.repository.SettlementRepository;
 import com.rezeptor.settlement.svc.service.DebtSimplifierService;
 import com.rezeptor.settlement.svc.service.SettlementService;
@@ -51,6 +56,63 @@ public class SettlementServiceImpl implements SettlementService {
                         .toList())
                 .transferCount(transfers.size())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public SettlementDto createSettlement(SettlementCreateReq req) {
+        if (req.getFromUserId().equals(req.getToUserId())) {
+            throw new BusinessException("fromUserId and toUserId must be different");
+        }
+
+        BigDecimal outstandingDebt = calculateFinalBalances(req.getGroupId()).stream()
+                .filter(balance -> balance.getUserId().equals(req.getFromUserId()))
+                .map(balance -> balance.getAmount().negate())
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+
+        if (outstandingDebt.signum() <= 0) {
+            throw new BusinessException("User " + req.getFromUserId() + " has no outstanding debt in group " + req.getGroupId());
+        }
+        if (req.getAmount().compareTo(outstandingDebt) > 0) {
+            throw new BusinessException("Amount " + req.getAmount().toPlainString()
+                    + " exceeds outstanding debt " + outstandingDebt.toPlainString() + " of user " + req.getFromUserId());
+        }
+
+        SettlementModel saved = settlementRepository.save(SettlementModel.builder()
+                .groupId(req.getGroupId())
+                .fromUserId(req.getFromUserId())
+                .toUserId(req.getToUserId())
+                .amount(req.getAmount())
+                .note(req.getNote())
+                .build());
+        log.info("Settlement created with id: {}", saved.getId());
+
+        return SettlementDto.builder()
+                .id(saved.getId())
+                .groupId(saved.getGroupId())
+                .fromUserId(saved.getFromUserId())
+                .toUserId(saved.getToUserId())
+                .amount(saved.getAmount())
+                .note(saved.getNote())
+                .paidAt(saved.getPaidAt())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SettlementHistoryDto> getHistory(Long groupId) {
+        return settlementRepository.findHistoryByGroupId(groupId).stream()
+                .map(history -> SettlementHistoryDto.builder()
+                        .id(history.getId())
+                        .fromUserId(history.getFromUserId())
+                        .toUserId(history.getToUserId())
+                        .amount(history.getAmount())
+                        .note(history.getNote())
+                        .paidAt(history.getPaidAt())
+                        .cumulativeAmount(history.getCumulativeAmount())
+                        .build())
+                .toList();
     }
 
     private List<BalanceData> calculateFinalBalances(Long groupId) {

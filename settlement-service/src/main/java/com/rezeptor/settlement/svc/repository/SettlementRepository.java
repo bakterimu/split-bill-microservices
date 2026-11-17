@@ -2,6 +2,7 @@ package com.rezeptor.settlement.svc.repository;
 
 import com.rezeptor.settlement.svc.entity.SettlementModel;
 import com.rezeptor.settlement.svc.entity.projection.SettledBalanceProjection;
+import com.rezeptor.settlement.svc.entity.projection.SettlementHistoryProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +28,18 @@ public interface SettlementRepository extends JpaRepository<SettlementModel, Lon
             group by t.user_id
             """, nativeQuery = true)
     List<SettledBalanceProjection> findNetSettledByGroupId(@Param("groupId") Long groupId);
+
+    @Query(value = """
+            select s.id                                         as id,
+                   s.from_user_id                               as fromUserId,
+                   s.to_user_id                                 as toUserId,
+                   s.amount                                     as amount,
+                   s.note                                       as note,
+                   s.paid_at                                    as paidAt,
+                   sum(s.amount) over (order by s.paid_at, s.id) as cumulativeAmount
+            from settlements s
+            where s.group_id = :groupId
+            order by s.paid_at, s.id
+            """, nativeQuery = true)
+    List<SettlementHistoryProjection> findHistoryByGroupId(@Param("groupId") Long groupId);
 }
