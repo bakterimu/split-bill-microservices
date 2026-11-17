@@ -33,6 +33,13 @@ public class RestExceptionHandler {
                 ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage())).toEntity();
     }
 
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<?> handleServiceUnavailableException(ServiceUnavailableException ex) {
+        log.warn("Dependency unavailable: {}", ex.getMessage());
+        return Response.serviceUnavailable(
+                ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage())).toEntity();
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         List<ValidationErrorData> errors = ex.getBindingResult().getFieldErrors().stream()

@@ -61,6 +61,15 @@ public class Response<T> {
                 .build();
     }
 
+    public static <T> Response<T> serviceUnavailable(T problem) {
+        return Response.<T>builder()
+                .success(false)
+                .message("Service unavailable")
+                .statusCode(503)
+                .data(problem)
+                .build();
+    }
+
     public static <T> Response<T> internalServerError(T problem) {
         return Response.<T>builder()
                 .success(false)
