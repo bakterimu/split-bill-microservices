@@ -1,0 +1,37 @@
+ spring:
+  application:
+    name: split-bill-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: user-service
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/user/**,/api/group/**
+            - id: expense-service
+              uri: ${EXPENSE_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/expense/**
+            - id: settlement-service
+              uri: ${SETTLEMENT_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/settlement/**
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    urls-primary-name: user-service
+    urls:
+      - name: user-service
+        url: /api/user/v3/api-docs
+      - name: expense-service
+        url: /api/expense/v3/api-docs
+      - name: settlement-service
+        url: /api/settlement/v3/api-docs
