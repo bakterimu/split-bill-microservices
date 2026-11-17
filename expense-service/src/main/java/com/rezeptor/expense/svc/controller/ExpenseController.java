@@ -4,6 +4,7 @@ import com.rezeptor.expense.svc.dto.request.ExpenseCreateReq;
 import com.rezeptor.expense.svc.dto.response.BalanceDto;
 import com.rezeptor.expense.svc.dto.response.ExpenseDto;
 import com.rezeptor.expense.svc.dto.response.ExpenseSummaryDto;
+import com.rezeptor.expense.svc.dto.response.MonthlyReportDto;
 import com.rezeptor.expense.svc.dto.response.PageDto;
 import com.rezeptor.expense.svc.dto.response.Response;
 import com.rezeptor.expense.svc.service.ExpenseService;
@@ -11,10 +12,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -44,5 +47,13 @@ public class ExpenseController {
     @GetMapping("/balance")
     public ResponseEntity<Response<List<BalanceDto>>> getBalancesByGroup(@RequestParam @Positive Long groupId) {
         return Response.ok(expenseService.getBalancesByGroup(groupId)).toEntity();
+    }
+
+    @GetMapping("/report/monthly")
+    public ResponseEntity<Response<List<MonthlyReportDto>>> getMonthlyReport(
+            @RequestParam @Positive Long groupId,
+            @RequestParam @Min(2000) @Max(2100) int year,
+            @RequestParam(defaultValue = "0") @PositiveOrZero BigDecimal minTotal) {
+        return Response.ok(expenseService.getMonthlyReport(groupId, year, minTotal)).toEntity();
     }
 }

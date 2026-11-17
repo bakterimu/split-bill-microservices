@@ -9,6 +9,7 @@ import com.rezeptor.expense.svc.dto.response.BalanceDto;
 import com.rezeptor.expense.svc.dto.response.ExpenseDto;
 import com.rezeptor.expense.svc.dto.response.ExpenseShareDto;
 import com.rezeptor.expense.svc.dto.response.ExpenseSummaryDto;
+import com.rezeptor.expense.svc.dto.response.MonthlyReportDto;
 import com.rezeptor.expense.svc.dto.response.PageDto;
 import com.rezeptor.expense.svc.entity.ExpenseModel;
 import com.rezeptor.expense.svc.entity.projection.ExpenseSummaryProjection;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +109,20 @@ public class ExpenseServiceImpl implements ExpenseService {
                         .totalPaid(b.getTotalPaid())
                         .totalOwed(b.getTotalOwed())
                         .netBalance(b.getNetBalance())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MonthlyReportDto> getMonthlyReport(Long groupId, int year, BigDecimal minTotal) {
+        return expenseRepository.findMonthlyReport(groupId, year, minTotal).stream()
+                .map(r -> MonthlyReportDto.builder()
+                        .month(r.getMonth())
+                        .category(Category.valueOf(r.getCategory()))
+                        .transactionCount(r.getTransactionCount())
+                        .totalAmount(r.getTotalAmount())
+                        .averageAmount(r.getAverageAmount())
                         .build())
                 .toList();
     }
