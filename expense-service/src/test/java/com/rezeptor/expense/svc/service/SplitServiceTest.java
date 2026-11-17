@@ -26,7 +26,7 @@ class SplitServiceTest {
     void equalSplitDividesEvenly() {
         List<ShareResultData> result = equal.split(amount("3000000"), participants(1L, 2L, 3L, 4L));
 
-        assertThat(result).extracting(ShareResultData::userId, ShareResultData::shareAmount).containsExactly(
+        assertThat(result).extracting(ShareResultData::getUserId, ShareResultData::getShareAmount).containsExactly(
                 tuple(1L, amount("750000.00")),
                 tuple(2L, amount("750000.00")),
                 tuple(3L, amount("750000.00")),
@@ -37,7 +37,7 @@ class SplitServiceTest {
     void equalSplitGivesRemainingCentToLowestUserId() {
         List<ShareResultData> result = equal.split(amount("100000"), participants(3L, 1L, 2L));
 
-        assertThat(result).extracting(ShareResultData::userId, ShareResultData::shareAmount).containsExactly(
+        assertThat(result).extracting(ShareResultData::getUserId, ShareResultData::getShareAmount).containsExactly(
                 tuple(1L, amount("33333.34")),
                 tuple(2L, amount("33333.33")),
                 tuple(3L, amount("33333.33")));
@@ -49,7 +49,7 @@ class SplitServiceTest {
         List<ShareResultData> result = percentage.split(amount("2000000"), List.of(
                 participant(1L, "40"), participant(2L, "20"), participant(3L, "20"), participant(4L, "20")));
 
-        assertThat(result).extracting(ShareResultData::userId, ShareResultData::shareAmount).containsExactly(
+        assertThat(result).extracting(ShareResultData::getUserId, ShareResultData::getShareAmount).containsExactly(
                 tuple(1L, amount("800000.00")),
                 tuple(2L, amount("400000.00")),
                 tuple(3L, amount("400000.00")),
@@ -61,7 +61,7 @@ class SplitServiceTest {
         List<ShareResultData> result = percentage.split(amount("10"), List.of(
                 participant(1L, "33.33"), participant(2L, "33.33"), participant(3L, "33.34")));
 
-        assertThat(result).extracting(ShareResultData::userId, ShareResultData::shareAmount).containsExactly(
+        assertThat(result).extracting(ShareResultData::getUserId, ShareResultData::getShareAmount).containsExactly(
                 tuple(1L, amount("3.33")),
                 tuple(2L, amount("3.33")),
                 tuple(3L, amount("3.34")));
@@ -81,7 +81,7 @@ class SplitServiceTest {
         List<ShareResultData> result = exact.split(amount("450000"), List.of(
                 participant(1L, "150000"), participant(3L, "150000"), participant(4L, "150000")));
 
-        assertThat(result).extracting(ShareResultData::userId, ShareResultData::shareAmount).containsExactly(
+        assertThat(result).extracting(ShareResultData::getUserId, ShareResultData::getShareAmount).containsExactly(
                 tuple(1L, amount("150000.00")),
                 tuple(3L, amount("150000.00")),
                 tuple(4L, amount("150000.00")));
@@ -122,6 +122,6 @@ class SplitServiceTest {
     }
 
     private static BigDecimal total(List<ShareResultData> shares) {
-        return shares.stream().map(ShareResultData::shareAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return shares.stream().map(ShareResultData::getShareAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

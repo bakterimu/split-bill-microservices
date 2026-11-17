@@ -50,12 +50,12 @@ public class PercentageSplitServiceImpl implements SplitService {
                 .toList();
 
         BigDecimal difference = amount.subtract(rounded.stream()
-                .map(ShareResultData::shareAmount)
+                .map(ShareResultData::getShareAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         return rounded.stream()
-                .map(s -> s.userId().equals(largestUserId)
-                        ? new ShareResultData(s.userId(), s.shareAmount().add(difference))
+                .map(s -> s.getUserId().equals(largestUserId)
+                        ? new ShareResultData(s.getUserId(), s.getShareAmount().add(difference))
                         : s)
                 .toList();
     }
