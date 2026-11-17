@@ -1,0 +1,13 @@
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN --mount=type=cache,target=/root/.m2,sharing=locked mvn -q -B package -DskipTests
+
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+RUN useradd --system --uid 1001 appuser
+COPY --from=build /app/target/*.jar app.jar
+USER appuser
+EXPOSE 8083
+ENTRYPOINT ["java", "-jar", "app.jar"]

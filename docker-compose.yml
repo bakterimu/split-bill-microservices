@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  user-service:
+    build: ./user-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/user_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  expense-service:
+    build: ./expense-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/expense_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      USER_SERVICE_URL: http://user-service:8081/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+
+  settlement-service:
+    build: ./settlement-service
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/settlement_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      EXPENSE_SERVICE_URL: http://expense-service:8082/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      expense-service:
+        condition: service_started
+
+  api-gateway:
+    build: ./split-bill-gateway
+    environment:
+      USER_SERVICE_URL: http://user-service:8081
+      EXPENSE_SERVICE_URL: http://expense-service:8082
+      SETTLEMENT_SERVICE_URL: http://settlement-service:8083
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      - user-service
+      - expense-service
+      - settlement-service
+
+volumes:
+  pgdata:
